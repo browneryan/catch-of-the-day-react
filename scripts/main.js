@@ -9,6 +9,13 @@ var History = ReactRouter.History;
 
 var createBrowserHistory = require('history/lib/createBrowserHistory');
 
+// Firebase
+var Rebase = require('re-base');
+var base = Rebase.createClass('https://catchoftheday-jarb.firebaseio.com/');
+
+
+
+// Helpers
 var h = require('./helpers');
 
 /*
@@ -21,6 +28,12 @@ var App = React.createClass({
         fishes : {},
         order : {}
       }
+    },
+    componentDidMount : function() {
+      base.syncState(this.props.params.storeId + '/fishes', {
+        context : this,
+        state : 'fishes'
+      });
     },
     addToOrder : function(key) {
       this.state.order[key] = this.state.order[key] + 1 || 1;
@@ -160,7 +173,7 @@ var Order = React.createClass({
     return (
       <li>
         {count}lbs
-        {fish.name} 
+        {fish.name}
         <span className="price">{h.formatPrice(count * fish.price)}</span>
       </li>
     )
