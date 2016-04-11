@@ -13,7 +13,7 @@ var createBrowserHistory = require('history/lib/createBrowserHistory');
 var Rebase = require('re-base');
 var base = Rebase.createClass('https://catchoftheday-jarb.firebaseio.com/');
 
-
+var Catalyst = require('react-catalyst');
 
 // Helpers
 var h = require('./helpers');
@@ -23,6 +23,7 @@ var h = require('./helpers');
 */
 
 var App = React.createClass({
+  mixins : [Catalyst.LinkedStateMixin],
     getInitialState : function () {
       return {
         fishes : {},
@@ -72,7 +73,7 @@ var App = React.createClass({
             </ul>
           </div>
           <Order fishes={this.state.fishes} order={this.state.order} />
-          <Inventory addFish={this.addFish} loadSamples={this.loadSamples}/>
+          <Inventory addFish={this.addFish} loadSamples={this.loadSamples} fishes={this.state.fishes} linkState={this.linkState} />
         </div>
       )
     }
@@ -218,20 +219,31 @@ var Order = React.createClass({
 })
 
 /*
-  Render Order
-  <
-*/
-
-/*
   Inventory
   <Inventory/>
 */
 var Inventory = React.createClass({
+  renderInventory : function(key) {
+    var linkState = this.props.linkState;
+    return (
+      <div className="fish-edit" key={key}>
+        <input type="text" valueLink={linkState('fishes.'+ key +'.name')}/>
+        <input type="text" valueLink={linkState('fishes.'+ key +'.price')}/>
+        <select valueLink={linkState('fishes.'+ key +'.')}>
+          <option value="unavailable">Sold Out!</option>
+          <option value="available">Fresh!</option>
+        </select>
+        <textarea valueLink={linkState('fishes.'+ key +'.')}></textarea>
+        <input type="text" valueLink={linkState('fishes.'+ key +'.image')}/>
+        <button>Remove Fish</button>
+      </div>
+    )
+  },
   render: function() {
     return (
       <div>
         <h2> Inventory </h2>
-
+        {Object.keys(this.props.fishes).map(this.renderInventory)}
         <AddFishForm {...this.props} />
         <button onClick={this.props.loadSamples}>Load Sample Fishes</button>
       </div>
@@ -242,7 +254,7 @@ var Inventory = React.createClass({
 /*
   Store Picker Component
   This will let us make <StorePicker/>
-  */
+*/
 
 var StorePicker = React.createClass({
     mixins: [History],
